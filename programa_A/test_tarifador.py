@@ -31,17 +31,84 @@ def test_ejemplo_de_la_especificacion():
 
 # --- Escriba sus pruebas a partir de aqui ---------------------------------
 
-# R1 - #1 Duración tolerancia de gracia
-def test_duracion_tolerancia_de_gracia_dentro_de_10_minutos():
-    """Caso de prueba: 10 minutos de tolerancia = S/ 0.00."""
-    total = taf.calcular_total(
-        datetime(2026, 9, 29, 10, 0), datetime(2026, 9, 29, 10, 8), "R1-test"
-    )
-    assert total == Decimal("0.00")
+# Casos de prueba derivados
 
-def test_duracion_tolerancia_de_gracia_fuera_de_10_minutos():
-    """Caso de prueba: 12 minutos de tolerancia = S/ 0.00."""
-    total = taf.calcular_total(
-        datetime(2026, 9, 29, 10, 0), datetime(2026, 9, 29, 10, 12), "R1-test"
+def test_10_minutos_de_gracia_son_gratis():
+    """CP01 - Limite R1 (10 min exactos)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 10, 0), datetime(2026, 9, 21, 10, 10),
+        "ABC-123", "NINGUNO",
     )
-    assert total != Decimal("0.00")
+    assert recibo.total == Decimal("0.00")
+    assert recibo.minutos_facturables == 0
+
+
+def test_11_minutos_cobran_una_fraccion():
+    """CP02 - Limite R1 (11 min)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 10, 0), datetime(2026, 9, 21, 10, 11),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.total == Decimal("3.00")
+    assert recibo.minutos_facturables == 15
+
+
+def test_15_minutos_equivalen_a_una_fraccion():
+    """CP03 - Limite R2 (15 min exactos)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 10, 0), datetime(2026, 9, 21, 10, 15),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.total == Decimal("3.00")
+    assert recibo.minutos_facturables == 15
+
+
+def test_16_minutos_cobran_dos_fracciones():
+    """CP04 - Limite R2 (16 min, redondeo arriba)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 10, 0), datetime(2026, 9, 21, 10, 16),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.total == Decimal("6.00")
+    assert recibo.minutos_facturables == 30
+
+
+def test_ingreso_a_las_08_00_aplica_tarifa_diurna():
+    """CP05 - Limite R3 (inicio exacto 08:00)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 8, 0), datetime(2026, 9, 21, 8, 15),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.fracciones_diurnas == 1
+    assert recibo.total == Decimal("3.00")
+
+
+def test_ingreso_a_las_20_00_aplica_tarifa_nocturna():
+    """CP06 - Limite R3 (inicio exacto 20:00)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 20, 0), datetime(2026, 9, 21, 20, 15),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.fracciones_nocturnas == 1
+    assert recibo.total == Decimal("2.50")
+
+
+def test_ingreso_a_las_19_45_combina_ambas_tarifas():
+    """CP07 - R3 (cruza cambio de franja 19:45)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 19, 45), datetime(2026, 9, 21, 20, 15),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.fracciones_diurnas == 1
+    assert recibo.fracciones_nocturnas == 1
+    assert recibo.total == Decimal("5.50")
+
+
+def test_estadia_prolongada_no_supera_los_45_soles():
+    """CP08 - Limite R4 (16 fracciones diurnas = 48.00, tope a 45.00)."""
+    recibo = taf.calcular_tarifa(
+        datetime(2026, 9, 21, 8, 0), datetime(2026, 9, 21, 12, 0),
+        "ABC-123", "NINGUNO",
+    )
+    assert recibo.subtotal == Decimal("45.00")
+    assert recibo.total == Decimal("45.00")
