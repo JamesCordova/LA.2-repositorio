@@ -30,3 +30,18 @@ def test_ejemplo_de_la_especificacion():
 
 
 # --- Escriba sus pruebas a partir de aqui ---------------------------------
+
+# R1 - #1 Duración tolerancia de gracia
+def test_duracion_tolerancia_de_gracia_dentro_de_10_minutos():
+    """Caso de prueba: 10 minutos de tolerancia = S/ 0.00."""
+    total = taf.calcular_total(
+        datetime(2026, 9, 29, 10, 0), datetime(2026, 9, 29, 10, 8), "R1-test"
+    )
+    assert total == Decimal("0.00")
+
+def test_duracion_tolerancia_de_gracia_fuera_de_10_minutos():
+    """Caso de prueba: 12 minutos de tolerancia = S/ 0.00."""
+    total = taf.calcular_total(
+        datetime(2026, 9, 29, 10, 0), datetime(2026, 9, 29, 10, 12), "R1-test"
+    )
+    assert total != Decimal("0.00")
