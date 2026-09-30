@@ -81,7 +81,7 @@ def test_ingreso_a_las_08_00_aplica_tarifa_diurna():
     assert recibo.total == Decimal("3.00")
 
 def test_ingreso_a_las_20_00_aplica_tarifa_nocturna():
-    """CP06 - Limite R3 (inicio exacto 20:00)"""
+    """CP06"""
     recibo = taf.calcular_tarifa(
         datetime(2026, 9, 21, 20, 0), datetime(2026, 9, 21, 20, 15),
         "ABC-123", "NINGUNO",
@@ -91,7 +91,7 @@ def test_ingreso_a_las_20_00_aplica_tarifa_nocturna():
 
 
 def test_ingreso_a_las_19_45_combina_ambas_tarifas():
-    """CP07 - R3 (cruza cambio de franja 19:45)"""
+    """CP07"""
     recibo = taf.calcular_tarifa(
         datetime(2026, 9, 21, 19, 45), datetime(2026, 9, 21, 20, 15),
         "ABC-123", "NINGUNO",
@@ -102,7 +102,7 @@ def test_ingreso_a_las_19_45_combina_ambas_tarifas():
 
 
 def test_estadia_prolongada_no_supera_los_45_soles():
-    """CP08 - Limite R4 (16 fracciones diurnas = 48.00, tope a 45.00)."""
+    """CP08"""
     recibo = taf.calcular_tarifa(
         datetime(2026, 9, 21, 8, 0), datetime(2026, 9, 21, 12, 0),
         "ABC-123", "NINGUNO",
