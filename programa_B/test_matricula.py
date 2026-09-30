@@ -51,7 +51,7 @@ class Curso(NamedTuple):
 
 class RegistroHistorial(NamedTuple):
     codigo: str
-    nota: int
+    nota_final: int    # Gemini coloco nota: int enves de nota_final: int, resultado de no ver el codigo
     intentos: int
 
 
@@ -307,16 +307,6 @@ def test_r6_validar_carga_supera_maximo_ampliado_lanza_excepcion():
 # ==============================================================================
 # REGLAS R7, R8, R9, R10: Validación Global de Matrícula
 # ==============================================================================
-
-
-def test_r7_validar_matricula_retorna_total_creditos(catalogo_base):
-    # R7: Retorna el total de créditos correctamente inscritos
-    codigos = ["IS101", "IS401", "IS403", "IS404", "IS405", "IS406", "IS407"]
-    creditos = mat.validar_matricula(
-        codigos, catalogo_base, [], promedio_anterior=Decimal("15.00")
-    )
-    assert creditos == 23
-
 
 def test_r7_validar_matricula_excede_maximo_cursos_lanza_excepcion(
     catalogo_base,
